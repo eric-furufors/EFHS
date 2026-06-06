@@ -1,0 +1,9 @@
+# Ignore the compiler build directory entirely
+.output/
+
+# Ignore the final compiled userspace binary
+efhs-app
+
+# Ignore temporary swap files from editors like Vim/Nano
+*.swp
+.DS_Store
