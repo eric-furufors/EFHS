@@ -21,6 +21,7 @@ The tool has two main parts:
 * **Kernel (`src/ebpf/`):** Hooks into `block_rq_issue` and `block_rq_complete`. It saves the start time of an I/O request in a BPF Hash Map using the `struct request *` pointer as the key, then calculates the duration on completion.
 * **Userspace (`src/userspace/`):** Loads the BPF program, reads the timestamps via a BPF Ring Buffer, and prints the metrics.
 
+```text
 EFHS
 ├── Makefile
 ├── README.md
@@ -31,6 +32,7 @@ EFHS
 ├── include/
 ├── docs/
 └── tests/              # Test scripts and virtual disk setup
+```
 
 ## Current Status & Roadmap
 * **Phase 1: The Skeleton (June 2026) - CURRENT**
