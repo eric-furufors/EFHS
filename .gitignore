@@ -3,6 +3,7 @@
 
 # Ignore the final compiled userspace binary
 efhs-app
+src/userspace/sensor.skel.h
 
 # Ignore temporary swap files from editors like Vim/Nano
 *.swp
