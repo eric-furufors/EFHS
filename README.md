@@ -38,7 +38,7 @@ EFHS
 * **Phase 1: The Skeleton (June 2026) - CURRENT**
   * [x] Set up standalone libbpf-bootstrap project.
   * [x] Hook into `block_rq_issue` and verify events show up.
-  * [ ] Move data tracking from `trace_pipe` to a BPF Ring Buffer.
+  * [x] Move data tracking from `trace_pipe` to a BPF Ring Buffer.
   * [ ] Calculate basic latency delta (completion time - issue time).
 * **Phase 2: The Engine & Virtual Lab (July 2026)**
   * [ ] Add log-scale histograms and percentile math.
@@ -66,6 +66,7 @@ sudo cat /sys/kernel/debug/tracing/trace_pipe
 
 ## Development Log & Findings
 * **June 2026:** Got the build system working. Verified that the `block_rq_issue` hook is successfully catching background disk I/O from system daemons like `kworker` and `jbd2`.
+* **July 2026:** Streamlined the build system to link against global system dependencies (`-lbpf` and system `bpftool`) rather than compiling them locally. Kernel code made to push live structures into a BPF Ring Buffer, eliminating the need to read `trace_pipe` and allowing the userspace C app to process and print structured I/O events in actively.
 
 ## eBPF Reference List
 * [ebpf.io](https://ebpf.io/what-is-ebpf/) (General architecture)

@@ -1,14 +1,11 @@
 OUTPUT := .output
 CLANG := clang
-BPFTOOL_SRC := $(abspath $(HOME)/libbpf-bootstrap/bpftool/src)
-# Point directly to the working library asset compiled by bpftool
-LIBBPF_OBJ := $(OUTPUT)/bpftool-dir/bootstrap/libbpf/libbpf.a
-BPFTOOL := $(OUTPUT)/bpftool-local
+BPFTOOL := /usr/sbin/bpftool
 
-INCLUDES := -I$(OUTPUT) -I./src/shared -I./src/userspace -I$(OUTPUT)/bpftool-dir/bootstrap/libbpf/include
+INCLUDES := -I$(OUTPUT) -I./src/shared -I./src/userspace
 
 CFLAGS := -g -Wall
-ALL_LDFLAGS := -lelf -lz -lpthread
+ALL_LDFLAGS := -lbpf -lelf -lz -lpthread
 
 .PHONY: all clean
 all: $(OUTPUT) efhs-app
@@ -19,18 +16,13 @@ clean:
 $(OUTPUT):
 	mkdir -p $(OUTPUT)
 
-$(BPFTOOL): | $(OUTPUT)
-	mkdir -p $(OUTPUT)/bpftool-dir
-	cd $(BPFTOOL_SRC) && $(MAKE) OUTPUT=$(abspath $(OUTPUT)/bpftool-dir)/ bootstrap
-	cp $(OUTPUT)/bpftool-dir/bootstrap/bpftool $(BPFTOOL)
-	chmod +x $(BPFTOOL)
-
 $(OUTPUT)/sensor.bpf.o: src/ebpf/sensor.bpf.c src/shared/vmlinux.h | $(OUTPUT)
 	$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_x86 -I./src/shared -c $< -o $@
 
-src/userspace/sensor.skel.h: $(OUTPUT)/sensor.bpf.o $(BPFTOOL)
+# Generates the skeleton using the global system bpftool
+src/userspace/sensor.skel.h: $(OUTPUT)/sensor.bpf.o | $(OUTPUT)
 	$(BPFTOOL) gen skeleton $< > $@
 
-# Link efhs-app using the bpftool-compiled libbpf.a dependency tracker
-efhs-app: src/userspace/main.c src/userspace/sensor.skel.h $(BPFTOOL)
-	$(CC) $(CFLAGS) $(INCLUDES) $< $(LIBBPF_OBJ) $(ALL_LDFLAGS) -o $@
+# Link efhs-app using the system's global libbpf (-lbpf in ALL_LDFLAGS)
+efhs-app: src/userspace/main.c src/userspace/sensor.skel.h
+	$(CC) $(CFLAGS) $(INCLUDES) $< $(ALL_LDFLAGS) -o $@
