@@ -35,18 +35,21 @@ EFHS
 ```
 
 ## Current Status & Roadmap
-* **Phase 1: The Skeleton (June 2026) - CURRENT**
+* **Phase 1: The Skeleton - COMPLETED**
   * [x] Set up standalone libbpf-bootstrap project.
   * [x] Hook into `block_rq_issue` and verify events show up.
   * [x] Move data tracking from `trace_pipe` to a BPF Ring Buffer.
   * [x] Calculate basic latency delta (completion time - issue time).
-* **Phase 2: The Engine & Virtual Lab (July 2026)**
-  * [ ] Add log-scale histograms and percentile math.
-  * [ ] Add Linux MD RAID mapping logic.
-  * [ ] Set up `dm-delay` to simulate a stuttering drive.
-* **Phase 3: Dashboard & Cleanup (August 2026)**
-  * [ ] Write a simple ncurses TUI dashboard.
-  * [ ] Benchmark overhead to ensure it stays under 1%.
+### Phase 2: The Latency Engine & Virtual Lab (Current Phase)
+- [ ] Implement latency threshold flagging (e.g., mark requests exceeding 100ms as degraded).
+- [ ] Build `dm-delay` lab script to simulate bad sectors and drive stalls.
+- [ ] Add basic latency aggregation (tracking min/max/average and histogram buckets).
+- [ ] Export structured metrics/events for external consumers (JSON/CLI streaming).
+### Out of Scope
+*The following features are for extended work:*
+* **MD RAID Topology Mapping:** Correlating physical block layer delays to Linux MD software RAID arrays.
+* **TUI/Dashboard Interface:** Custom `ncurses`-based terminal UI for live drive health monitoring.
+* **Overhead Benchmarking:** Micro-benchmarking eBPF ring buffer strain under extreme I/O workloads.
 
 ## Installation & Dependencies
 Requires `clang`, `llvm`, `libelf-dev`, and `bpftool`.
