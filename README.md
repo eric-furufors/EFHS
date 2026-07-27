@@ -39,7 +39,7 @@ EFHS
   * [x] Set up standalone libbpf-bootstrap project.
   * [x] Hook into `block_rq_issue` and verify events show up.
   * [x] Move data tracking from `trace_pipe` to a BPF Ring Buffer.
-  * [ ] Calculate basic latency delta (completion time - issue time).
+  * [x] Calculate basic latency delta (completion time - issue time).
 * **Phase 2: The Engine & Virtual Lab (July 2026)**
   * [ ] Add log-scale histograms and percentile math.
   * [ ] Add Linux MD RAID mapping logic.
