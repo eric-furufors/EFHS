@@ -18,11 +18,19 @@ static void sig_handler(int sig)
 static int handle_event(void *ctx, void *data, size_t data_sz) {
     const struct disk_io_event *e = data;
 
-    printf("%-16s %-6d Latency: %-10llu ns  Sectors: %-4u\n", 
-            e->comm, e->pid, e->latency_ns, e->sector_count);
+    // Convert nanoseconds to milliseconds
+    double latency_ms = (double)e->latency_ns / 1000000.0;
+
+    // Highlight latencies over 50ms in bold red using ANSI color codes
+    const char *color_start = (latency_ms >= 50.0) ? "\033[1;31m" : "";
+    const char *color_end   = (latency_ms >= 50.0) ? "\033[0m"    : "";
+
+    printf("%-16s %-8d Latency: %s%8.2f ms%s   Sectors: %-5u\n",
+           e->comm, e->pid, color_start, latency_ms, color_end, e->sector_count);
 
     return 0;
 }
+
 int main(int argc, char **argv) {
     struct sensor_bpf *skel;
     struct ring_buffer *rb = NULL;
