@@ -45,8 +45,11 @@ EFHS
 - [x] Implement latency threshold flagging (kernel-level filtering for requests >20ms).
 - [x] Build `dm-delay` lab script to simulate bad sectors and drive stalls.
 - [x] Add visual latency alerts (bold red highlighting for latencies ≥50ms).
-- [ ] Add basic latency aggregation (tracking min/max/average and histogram buckets).
-- [ ] Export structured metrics/events for external consumers (JSON/CLI streaming).
+- [x] Add basic latency aggregation (tracking min/max/average and histogram buckets).
+* **Phase 3: Empirical Benchmarking & Comparative Study (Current Phase)**
+  * [ ] Build automated `fio` workload benchmarker to test under heavy I/O strain.
+  * [ ] Measure CPU/Memory overhead of eBPF kernel filtering vs. traditional tools.
+  * [ ] Field study: Manual troubleshooting (iostat/journalctl) vs. automated EFHS event attribution.
 
 ### Out of Scope
 *The following features are for extended work:*
@@ -91,6 +94,7 @@ sudo ./scripts/teardown_lab.sh
 * **June 2026:** Got the build system working. Verified that the `block_rq_issue` hook is successfully catching background disk I/O from system daemons like `kworker` and `jbd2`.
 * **July 2026:** Streamlined the build system to link against global system dependencies (`-lbpf` and system `bpftool`) rather than compiling them locally. Kernel code made to push live structures into a BPF Ring Buffer, eliminating the need to read `trace_pipe` and allowing the userspace C app to process and print structured I/O events in actively.
 * **August 2026:** Replaced lower-level `block_rq_*` tracepoints with `fentry/submit_bio` and `fentry/bio_endio`. Lower-level tracepoints fired after Device Mapper delays slept, masking latency. `submit_bio` captures full top-to-bottom I/O execution time, accurately flagging synthetic `dm-delay` stalls (~500ms) and real physical disk bottlenecks. Added userspace ms conversion and ANSI color thresholds.
+* **August 2026:** Completed Phase 2. Updated userspace app (`main.c`) to stream I/O events asynchronously into `events.csv`. Built `scripts/analyze_csv.py` to calculate summary metrics (min/max/average latency and process event counts). Validated that top-of-stack eBPF tracing captures synthetic `dm-delay` stalls (~500ms) alongside real background disk I/O. Shifted Phase 3 scope toward thesis benchmarking and field study experiments.
 
 ## eBPF Reference List
 * [ebpf.io](https://ebpf.io/what-is-ebpf/) (General architecture)
