@@ -8,3 +8,11 @@ src/userspace/sensor.skel.h
 # Ignore temporary swap files from editors like Vim/Nano
 *.swp
 .DS_Store
+.output/
+efhs-app
+src/userspace/sensor.skel.h
+events.csv
+hist.csv
+old/
+run*/
+*.log
