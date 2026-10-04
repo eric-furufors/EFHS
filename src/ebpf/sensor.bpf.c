@@ -1,3 +1,4 @@
+#include <bpf/bpf_core_read.h>
 #include "vmlinux.h"
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
@@ -53,6 +54,26 @@ static __always_inline u32 log2_slot(u64 v)
     return r;
 }
 
+// Kernels before 5.12 have bi_disk + bi_partno instead of bi_bdev
+struct bio___old {
+    struct gendisk *bi_disk;
+    u8 bi_partno;
+} __attribute__((preserve_access_index));
+
+static __always_inline u32 get_dev(struct bio *bio)
+{
+    if (bpf_core_field_exists(bio->bi_bdev)) {
+        struct block_device *bdev = BPF_CORE_READ(bio, bi_bdev);
+        return BPF_CORE_READ(bdev, bd_dev);
+    } else {
+        struct bio___old *old = (void *)bio;
+        struct gendisk *disk = BPF_CORE_READ(old, bi_disk);
+        u8 partno = BPF_CORE_READ(old, bi_partno);
+        return ((u32)BPF_CORE_READ(disk, major) << 20) |
+               (BPF_CORE_READ(disk, first_minor) + partno);
+    }
+}
+
 // 1. Captured when I/O enters the kernel block layer (BEFORE dm-delay)
 SEC("fentry/submit_bio")
 int BPF_PROG(submit_bio_entry, struct bio *bio)
@@ -64,7 +85,7 @@ int BPF_PROG(submit_bio_entry, struct bio *bio)
     info.pid = bpf_get_current_pid_tgid() >> 32;
     info.sectors = bio->bi_iter.bi_size >> 9; // size has to be read here
     info.sector = bio->bi_iter.bi_sector;
-    info.dev = bio->bi_bdev->bd_dev;
+    info.dev = get_dev(bio);
     info.op = bio->bi_opf & 0xff;
     bpf_get_current_comm(&info.comm, sizeof(info.comm));
 
